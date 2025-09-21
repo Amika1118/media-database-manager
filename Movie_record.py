@@ -246,7 +246,7 @@ def movies():
             letter = input("\nEnter the first letter: ").capitalize()
             print()
 
-            if letter.lower() in ["quit"]:
+            if letter.lower() in ["quit","exit"]:
                 break
 
             elif len(letter) > 1:
@@ -255,7 +255,12 @@ def movies():
                 for title, data in Movies.items():
                     if letter.lower() in title.lower():
                         gen = data[3:]
-                        print(f"Movie No. 0{i}")
+
+                        if i < 10:
+                            print(f"Movie No. 0{i}")
+                        else:
+                            print(f"Movie No. {i}")
+
                         print(f"Movie         : {title}\n"
                               f"Released year : {data[0]}\n"
                               f"Country       : {Country[data[1]]}\n"
@@ -267,6 +272,9 @@ def movies():
                         print()
 
                         i+=1
+
+                if i == 1:
+                    print(f"The are 0 movies with `{letter}` in the database.")
 
                 input("Press enter to continue...\n\n")
 
@@ -1111,3 +1119,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+#------------------------------------------------------------------------------------------
