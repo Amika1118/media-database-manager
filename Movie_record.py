@@ -1,4 +1,6 @@
 import csv
+import os
+from fileinput import close
 
 Genres = {
           "1":"Romantic",
@@ -49,6 +51,7 @@ Rating = {
 
 Movies = {}
 TvSeries = {}
+Anime = {}
 
 #------------------------------------------------------------------------------------------
 def movies():
@@ -145,7 +148,8 @@ def movies():
                 print("Invalid input. Please try again.")
 
     def write_movies():
-        with open("Movies.csv", "w", newline="") as csvfile:
+        with open("Movies.csv", "w", newline="") as csvfile:  # clear file safely
+
             writer = csv.writer(csvfile)
             for title in Movies:
                 writer.writerow([title] + Movies[title])
@@ -698,17 +702,25 @@ def movies():
     if __name__ == '__main__':
         main_movie()
 
-def tv_series():
+def tv_series(current_type):
+
+    if current_type == "tv":
+        file = "TvSeries.csv"
+        dict = TvSeries
+    else:
+        file = "AnimeShows.csv"
+        dict = Anime
 
     def add_tv():
         read_tv()
         while True:
             try:
-                count = input("How many tv series do you want to add? ")
+                count = input(f"How many {current_type} series do you want to add? ")
+                print()
                 if count.isdigit():
                     count = int(count)
                     if count > 0:
-                        print(f"\nYou choose to add {count} tv series to the database\n")
+                        print(f"\nYou choose to add {count} {current_type} series to the database\n")
                         for i in range(count):
                             while True:
 
@@ -716,8 +728,8 @@ def tv_series():
                                 if title.lower() in ["q", "quit"]:
                                     return
 
-                                if title in TvSeries:
-                                    print(f"`{title}` tv series already exists.")
+                                if title in dict:
+                                    print(f"`{title}` {current_type} series already exists.")
                                 else:
                                     while True:
                                         try:
@@ -727,11 +739,12 @@ def tv_series():
                                             print("Please enter a number.")
 
                                     while True:
-                                        begin_year = input("Enter a tv series begin year: ").strip()
+                                        begin_year = input(f"Enter a {current_type} series begin year: ").strip()
+                                        print()
                                         if begin_year.isdigit() and len(begin_year) == 4:
                                             begin_year = int(begin_year)
                                             if begin_year < 1900:
-                                                print("Tv series begin year must be at least after 1900.")
+                                                print(f"{current_type.capitalize()} series begin year must be at least after 1900.\n")
                                             else:
                                                 print(f"The beginning year you entered is `{begin_year}`.")
                                                 while True:
@@ -741,11 +754,12 @@ def tv_series():
                                                         adder(title,seasons,begin_year,end_year)
                                                         break
                                                     elif still_going in ["n","no","2","02"]:
-                                                        end_year = input("Enter a tv series end year: ").strip()
+                                                        end_year = input(f"Enter a {current_type} series end year: ").strip()
+                                                        print()
                                                         if end_year.isdigit() and len(end_year) == 4:
                                                             end_year = int(end_year)
                                                             if end_year < begin_year:
-                                                                print("Tv series end year must be after the begin year.")
+                                                                print(f"{current_type.capitalize()} series end year must be after the begin year.\n")
                                                             else:
                                                                 print(f"The ending year you entered is `{end_year}`.")
                                                                 adder(title,seasons,begin_year,end_year)
@@ -761,11 +775,11 @@ def tv_series():
                                             print("Please enter a valid begin year.")
                                     break
                     else:
-                        print("Please enter a valid number of tv series.")
+                        print(f"Please enter a valid number of {current_type} series.\n")
                 else:
-                    print("Please enter a digit number of tv series.")
+                    print(f"Please enter a digit number of {current_type} series.\n")
             except ValueError:
-                print("Please enter a digit number of tv series.")
+                print(f"Please enter a digit number of {current_type} series.\n")
 
     def adder(title,seasons,begin_year,end_year):
         while True:
@@ -782,7 +796,8 @@ def tv_series():
                 print("Please a number between 1 and 10.")
 
         while True:
-            rate = input("Enter your rating for this tv series : ").strip()
+            rate = input(f"Enter your rating for this {current_type} series : ").strip()
+            print()
             if rate.lower() in ["q","quit"]:
                 rat = "0"
                 break
@@ -823,7 +838,10 @@ def tv_series():
                                 print("Please enter a valid number.")
                     print("\n----------------------------------------------")
                     print(f"`{title}` series added successfully!\n\n")
-                    TvSeries[title] = [seasons, begin_year, end_year,con,rat] + selected_genres
+                    if current_type == "tv":
+                        TvSeries[title] = [seasons, begin_year, end_year,con,rat] + selected_genres
+                    elif current_type == "anime":
+                        Anime[title] = [seasons, begin_year, end_year,con,rat] + selected_genres
                     write_tv()
                     break
                 else:
@@ -832,15 +850,19 @@ def tv_series():
                 print("Please enter a valid number of genres.")
 
     def write_tv():
-        with open("TvSeries.csv", "w", newline="") as csvfile:
+        with open(file, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             for title in TvSeries:
                 writer.writerow([title] + TvSeries[title])
 
     def read_tv():
-        TvSeries.clear()
-        with open("TvSeries.csv", "r", newline="") as file:
-            reader = csv.reader(file)
+        if current_type == "tv":
+            TvSeries.clear()
+        else:
+            Anime.clear()
+
+        with open(file, "r", newline="") as files:
+            reader = csv.reader(files)
             for row in reader:
                 if row:
                     title = row[0]
@@ -850,15 +872,18 @@ def tv_series():
                     con = row[4]
                     rat = row[5]
                     genre_ids = [g.strip() for g in row[6:] if g.strip()]
-                    TvSeries[title] = [seasons] + [begin_year] + [end_year] + [con] + [rat] + genre_ids
+                    if current_type == "tv":
+                        TvSeries[title] = [seasons] + [begin_year] + [end_year] + [con] + [rat] + genre_ids
+                    else:
+                        Anime[title] = [seasons] + [begin_year] + [end_year] + [con] + [rat] + genre_ids
 
     def print_tv():
         read_tv()
         print("\n----------------------------------------------")
-        print("    --- Tv Series in the movie database ---   ")
+        print(f"    --- {current_type} Series in the movie database ---   \n")
         print("----------------------------------------------\n\n")
 
-        name = "Tv Series"
+        name = f"{current_type} Series"
         ge = "Genre"
         y = "Years"
         s = "Seasons"
@@ -874,7 +899,12 @@ def tv_series():
         print()
 
         i = 1
-        for title,data in TvSeries.items():
+        if current_type == "tv":
+            Dict = TvSeries
+        else:
+            Dict = Anime
+
+        for title,data in Dict.items():
             season = data[0]
             begin_year = data[1]
             end_year = data[2]
@@ -896,7 +926,7 @@ def tv_series():
         print()
 
         count = i - 1
-        print(f"Number of tv seris in the database are {count}")
+        print(f"Number of {current_type} seris in the database are {count}")
 
         for j in range(125):
             print("-", end="")
@@ -913,7 +943,7 @@ def tv_series():
                     f"{i:3}. {title:35} {season:^3}       {begin_year:4}-{end_year:4}     {Country[country]:<8}   {Rating[rating]:{num}}   {', '.join(genre_name):<45}")
 
     def search_tv():
-        print("Searching for Tv series...")
+        print(f"Searching for {current_type} series...\n")
         while True:
             user_input = input("How do you want to search? \n01. By Name \n02. By Released Year \n03. By Genre \n04. By Country \n05. By Rating \n06. Exit Search \n - - - - ->")
             match user_input:
@@ -934,7 +964,8 @@ def tv_series():
 
     def by_name():
         while True:
-            name = input("Please enter the first letter of the name of the tv series : ")
+            name = input(f"Please enter the first letter of the name of the {current_type} series : ")
+            print()
             if name in ["q","quit"]:
                 break
             else:
@@ -944,17 +975,18 @@ def tv_series():
                         print(title)
                     elif len(name) > 1:
                         if name.lower() in title.lower():
-                            print(f"Tv Series : {title}\nNumber of Seasons : {data[0]}\nReleased Year : {data[1]}\nEnd Year : {data[2]}\nCountry : {data[3]}\nRating : {data[4]}\nGenre : {Country[data[5]]}\nRating : {Rating[data[6]]}\n")
+                            print(f"{current_type.capitalize()} Series : {title}\nNumber of Seasons : {data[0]}\nReleased Year : {data[1]}\nEnd Year : {data[2]}\nCountry : {data[3]}\nRating : {data[4]}\nGenre : {Country[data[5]]}\nRating : {Rating[data[6]]}\n")
                             input("Press enter to continue...")
                         elif not (name.lower() in title.lower()):
                             print(f"{title} not in the database.")
                             input("Press enter to continue...")
                     else:
-                        print(f"Tv series with starting letter {title[0]} not found.")
+                        print(f"{current_type.capitalize()} series with starting letter {title[0]} not found.")
 
     def by_year():
         while True:
-            year = input("Please enter the released year of the tv series (q to quit) : ")
+            year = input(f"Please enter the released year of the {current_type} series (q to quit) : ")
+            print()
             if year.lower() in ["q", "quit"]:
                 break
             elif year.isdigit() and int(year) > 1999:
@@ -972,13 +1004,14 @@ def tv_series():
             print(f"{i}. {Genres[i]}")
         while True:
             read_tv()
-            genre = input("Please enter the genre or the genre id of the tv series (q to quit) : ")
+            genre = input(f"Please enter the genre or the genre id of the {current_type} series (q to quit) : ")
+            print()
             if genre.lower() in ["q", "quit"]:
                 break
 
             elif genre.isdigit():
                 if genre in Genres.keys():
-                    print(f"\nThe tv series with {Genres[genre]} genre.")
+                    print(f"\nThe {current_type} series with {Genres[genre]} genre.")
                     for title,data in TvSeries.items():
                         if genre in data[5:]:
                             print(title)
@@ -987,7 +1020,7 @@ def tv_series():
                     print("Please enter a valid genre id.")
 
             elif genre.capitalize() in Genres.values():
-                print(f"\nThe tv series with {genre} genre.")
+                print(f"\nThe {current_type} series with {genre} genre.")
                 for title,data in TvSeries.items():
                     keys = [k for k, v in Genres.items() if v == genre.capitalize()]
                     if keys[0] in data[5:]:
@@ -1003,7 +1036,8 @@ def tv_series():
 
         while True:
             read_tv()
-            country = input("Please enter the country or the country code of the tv series (q to quit) : ")
+            country = input(f"Please enter the country or the country code of the {current_type} series (q to quit) : ")
+            print()
             if country.lower() in ["q", "quit"]:
                 break
             elif country.isdigit():
@@ -1029,7 +1063,7 @@ def tv_series():
             if rate.lower() in ["q", "quit"]:
                 break
             elif rate.isdigit():
-                print(f"\nTv series with {Rating[rate]} rating.")
+                print(f"\n{current_type.capitalize()} series with {Rating[rate]} rating.")
                 for title,data in TvSeries.items():
                     print(title)
                 input("Press enter to continue...")
@@ -1038,7 +1072,7 @@ def tv_series():
 
     def sort_alphabetically_tv():
         read_tv()
-        print("Sorting alphabetically Tv series...")
+        print(f"Sorting alphabetically {current_type.capitalize()} series...\n")
         tv = []
         b = []
         for title, data in TvSeries.items():
@@ -1058,31 +1092,31 @@ def tv_series():
     def main_tv():
         while True:
             print("----------------------------------------------")
-            print("  ---  Welcome to Tv Series Recorder  ----    ")
+            print(f"  ---  Welcome to {current_type.capitalize()} Series Recorder  ----    ")
             print("----------------------------------------------")
-            print("01. Enter a tv series to the database")
-            print("02. Print all the tv series in the database")
-            print("03. Search for a tv series")
-            print("04. Sort the tv series alphabetically")
+            print(f"01. Enter a {current_type} series to the database")
+            print(f"02. Print all the {current_type} series in the database")
+            print(f"03. Search for a {current_type} series")
+            print(f"04. Sort the {current_type} series alphabetically")
             print("05. Exit")
             print("----------------------------------------------")
             choose = input("Enter your choice: ").strip().capitalize()
             print("\n----------------------------------------------")
 
             if choose == "1" or choose == "01":
-                print("You choose to add tv series to the database")
+                print(f"You choose to add {current_type} series to the database")
                 print("----------------------------------------------")
                 add_tv()
             elif choose == "2" or choose == "02":
-                print("You choose to see all tv series in the database")
+                print(f"You choose to see all {current_type} series in the database")
                 print("----------------------------------------------")
                 print_tv()
             elif choose == "3" or choose == "03":
-                print("You choose to search for a tv series")
+                print(f"You choose to search for a {current_type} series")
                 print("-----------------------------------------------")
                 search_tv()
             elif choose == "4" or choose == "04":
-                print("You choose to sort the tv series alphabetically.")
+                print(f"You choose to sort the {current_type} series alphabetically.")
                 print("-----------------------------------------------")
                 sort_alphabetically_tv()
             elif choose == "5" or choose == "05":
@@ -1098,8 +1132,8 @@ def tv_series():
 
 def main():
     while True:
-        print("Welcome to Tv Series/Movies Recorder")
-        choose = input("What do you want to add (movies/tv-series)..?\n01. Movies\n02. Tv-Series\n03. Exit main menu\n---------------------> ").strip().capitalize()
+        print("Welcome to Tv Series/Movies/Anime Recorder")
+        choose = input("What do you want to add (movies/tv-series/anime)..?\n01. Movies\n02. Tv-Series\n03. Anime\n04. Exit main menu\n---------------------> ").strip().lower()
 
         if choose in ["01","1","movies"]:
             print("\nYou choose movies ")
@@ -1108,8 +1142,12 @@ def main():
         elif choose in ["02","2","tv-series"]:
             print("\nYou choose tv-series ")
             print("------------------------------------------------\n\n")
-            tv_series()
-        elif choose in ["03","3","exit"]:
+            tv_series("tv")
+        elif choose in ["03","3","anime"]:
+            print("\nYou choose anime ")
+            print("------------------------------------------------\n\n")
+            tv_series("anime")
+        elif choose in ["04","4","exit"]:
             print("\nYou choose to exit from the program")
             print("------------------------------------------------\n\n")
             print("Bye bye!")
@@ -1119,5 +1157,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 #------------------------------------------------------------------------------------------
