@@ -1,8 +1,6 @@
 # 🎬 Media Database Manager
 
 ![Python](https://img.shields.io/badge/Python-3.6%2B-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 
 A comprehensive command-line application for managing your personal collection of **movies**, **TV series**, and **anime**. Built entirely in Python with no external dependencies, this tool helps you organize, search, and analyze your media library with powerful filtering and sorting capabilities.
 
