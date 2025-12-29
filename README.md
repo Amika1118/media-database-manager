@@ -157,14 +157,16 @@ The application uses intelligent ID mapping systems:
 
 ### Database Display
 ```
---------------------------------------------------------------------------------
-  Movie                        |     Year      |            Genre
---------------------------------------------------------------------------------
-  01. The Matrix               1999      America   ⭐⭐⭐⭐⭐   Action, Science Fiction
-  02. Spirited Away            2001      Japan     ⭐⭐⭐⭐⭐   Animated, Fantasy
-  03. Inception                2010      America   ⭐⭐⭐⭐     Action, Sci-Fi, Thriller
---------------------------------------------------------------------------------
-Number of movies in the database: 3
+--------------------------------------------------------------------------------------------------------------
+  Movie                        |     Year      |     Country     |   Rating          |      Genre
+--------------------------------------------------------------------------------------------------------------
+  01. The Matrix               |     1999      |     America     |   ⭐⭐⭐⭐⭐   | Action, Science Fiction
+  02. Spirited Away            |     2001      |     Japan       |   ⭐⭐⭐⭐⭐   | Animated, Fantasy
+  03. Inception                |     2010      |     America     |   ⭐⭐⭐⭐     | Action, Sci-Fi, Thriller
+  04. Before we go             |     2019      |     America     |   ⭐⭐⭐⭐     | Romantic
+  05. Finding you              |     2021      |     America     |   ⭐⭐⭐⭐     | Romantic
+---------------------------------------------------------------------------------------------------------------
+Number of movies in the database: 5
 ```
 
 ## 📁 Project Structure
@@ -222,7 +224,7 @@ Contributions are welcome! Here's how you can help:
 ### Development Setup
 ```bash
 # Fork and clone the repository
-git clone https://github.com/yourusername/media-database-manager.git
+git clone https://github.com/amika1118/media-database-manager.git
 
 # Create a virtual environment (optional)
 python -m venv venv
