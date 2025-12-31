@@ -176,12 +176,14 @@ def movies():
         name = "Movie"
         ge = "Genre"
         y = "Year"
-        for j in range(125):
+        con = "Country"
+        r = "Rating"
+        for j in range(137):
             print("-",end="")
 
-        print(f"  {name:^68}  | {y:^14} | {ge:^50}")
+        print(f"  {name:^58}  | {y:^10}  |{con:^13}|{r:^10}|{ge:^35}")
 
-        for j in range(125):
+        for j in range(137):
             print("-",end="")
         print()
 
@@ -945,19 +947,21 @@ def tv_series(current_type):
     def search_tv():
         print(f"Searching for {current_type} series...\n")
         while True:
-            user_input = input("How do you want to search? \n01. By Name \n02. By Released Year \n03. By Genre \n04. By Country \n05. By Rating \n06. Exit Search \n - - - - ->")
+            user_input = input("How do you want to search? \n01. By Name \n02. By Released Year \n03. By Genre \n04. By Country \n05. By Rating \n06. Super Search \n07. Exit Search \n - - - - ->")
             match user_input:
                 case "by name"|"name"|"1"|"01":
                     by_name()
                 case "by released year"|"released year"|"year"|"02"|"2":
-                    by_year()
+                    by_year("search")
                 case "by genre"|"genre"|"3"|"03":
                     by_genre()
                 case "by country"|"country"|"04"|"4":
                     by_country()
-                case "by rating"|"rating"|"05"|"0":
+                case "by rating"|"rating"|"05"|"5":
                     by_rating()
-                case "exit search"|"exit"|"06"|"6":
+                case "super search"|"super"|"06"|"6":
+                    super_search_tv()
+                case "exit search"|"exit"|"07"|"7":
                     break
                 case _:
                     print("Please enter a valid number.")
@@ -970,7 +974,7 @@ def tv_series(current_type):
                 break
             else:
                 read_tv()
-                for title,data in TvSeries.items():
+                for title,data in dict.items():
                     if name.lower() in title[0].lower():
                         print(title)
                     elif len(name) > 1:
@@ -983,21 +987,59 @@ def tv_series(current_type):
                     else:
                         print(f"{current_type.capitalize()} series with starting letter {title[0]} not found.")
 
-    def by_year():
+    def by_year(search_type):
         while True:
+            choice = input(f"How do you want to search by year?\n01. Begin Year of the {current_type.capitalize()} \n02. End Year of the {current_type.capitalize()} \n03. {current_type.capitalize()} shows in a year range\n -----------------------------> ")
+            if choice in ["01","1","02","2","03","3","begin year","ending year","begin","end","range","year range"]:
+                break
+            else:
+                print("Please enter a valid number.")
+
+            match choice:
+                case "1"|"01"|"begin"|"begin year":
+                    by_begin_or_end_year(search_type,"begin")
+                case "2"|"02"|"end year"|"end":
+                    by_begin_or_end_year(search_type,"end")
+                case "3"|"03"|"range"|"year range":
+                    by_year_range(search_type)
+
+
+    def by_begin_or_end_year(search_type,begin_or_ending):
+        year = []
+        for title,data in dict.items():
+            year.append(data[1])
+            year.append(data[2])
+
+        year.sort()
+        beg_year = year.index(0)
+        end_year = year[-1]
+
+        while True:
+            if begin_or_ending == "begin":
+                year_type = 1
+            else:
+                year_type = 2
+
             year = input(f"Please enter the released year of the {current_type} series (q to quit) : ")
             print()
             if year.lower() in ["q", "quit"]:
                 break
-            elif year.isdigit() and int(year) > 1999:
+            elif year.isdigit() and (int(beg_year) - 1) < int(year) < (int(end_year) + 1):
                 read_tv()
-                for title,data in TvSeries.items():
-                    if year in data[1]:
-                        print(title)
-
+                for title,data in dict.items():
+                    if year in data[year_type]:
+                        if search_type == "search":
+                            print(title)
+                        else:
+                            year_shows.append(title)
                 input("Press enter to continue...")
+                break
             else:
-                print(f"Please enter a valid year.")
+                print(f"Please enter a valid year between {beg_year} and {end_year}.\n")
+
+    def by_year_range(search_type):
+        print()
+
 
     def by_genre():
         for i in Genres:
@@ -1012,7 +1054,7 @@ def tv_series(current_type):
             elif genre.isdigit():
                 if genre in Genres.keys():
                     print(f"\nThe {current_type} series with {Genres[genre]} genre.")
-                    for title,data in TvSeries.items():
+                    for title,data in dict.items():
                         if genre in data[5:]:
                             print(title)
                     input("Press enter to continue...")
@@ -1021,7 +1063,7 @@ def tv_series(current_type):
 
             elif genre.capitalize() in Genres.values():
                 print(f"\nThe {current_type} series with {genre} genre.")
-                for title,data in TvSeries.items():
+                for title,data in dict.items():
                     keys = [k for k, v in Genres.items() if v == genre.capitalize()]
                     if keys[0] in data[5:]:
                         print(title)
@@ -1049,7 +1091,7 @@ def tv_series(current_type):
 
             elif country.capitalize() in Country.values():
                 print(f"\nTv Series from {country}.")
-                for title,data in TvSeries.items():
+                for title,data in dict.items():
                     if country in Country[data[3]]:
                         print(title)
                 input("Press enter to continue...")
@@ -1064,7 +1106,7 @@ def tv_series(current_type):
                 break
             elif rate.isdigit():
                 print(f"\n{current_type.capitalize()} series with {Rating[rate]} rating.")
-                for title,data in TvSeries.items():
+                for title,data in dict.items():
                     print(title)
                 input("Press enter to continue...")
             else:
@@ -1075,7 +1117,7 @@ def tv_series(current_type):
         print(f"Sorting alphabetically {current_type.capitalize()} series...\n")
         tv = []
         b = []
-        for title, data in TvSeries.items():
+        for title, data in dict.items():
             try:
                 tv.append(title)
             except IndexError:
@@ -1088,6 +1130,101 @@ def tv_series(current_type):
             print(f"{i}")
         for i in tv:
             print(f"{i}")
+
+    def super_search_tv():
+        user_in = input(f"How do you want search for {current_type}?\n01. By multiple genre \n02. ")
+        user = []
+        super_search_engine("multiple_genre")
+
+    con_shows = []
+    gen_shows = []
+    rate_shows = []
+    year_shows = []
+
+    def super_search_engine(choice):
+        read_tv()
+        multiple_genre = []
+        con_shows.clear()
+        gen_shows.clear()
+        rate_shows.clear()
+        is_num = False
+
+        if choice == "multiple_genre":
+            while True:
+                num = input("Enter the number of genres: ")
+                if num.isdigit():
+                    num = int(num)
+                    if num > 0:
+                        print("    ---- Genres ----    ")
+                        for key, value in Genres.items():
+                            i = int(key)
+                            if i < 10:
+                                print(f"    0{key} : {value}")
+                            else:
+                                print(f"    {key} : {value}")
+                        print()
+
+                        for number in range(num):
+                            while True:
+                                try:
+                                    genre = int(input("Enter the genre (0 to quit): "))
+                                    if str(genre) in Genres.keys():
+                                        if str(genre) not in multiple_genre:
+                                            multiple_genre.append(str(genre))
+                                            break
+                                        else:
+                                            print("You have already entered this genre.")
+                                    elif genre == 0 and multiple_genre.__len__() > 0:
+                                        break
+                                    else:
+                                        print("You must enter a at least one genre before quitting.")
+
+                                except ValueError:
+                                    print("Please enter a valid genre key.")
+                        is_num = True
+                    else:
+                        print("Please enter a number higher than 0")
+                else:
+                    print("Please enter a valid number.")
+
+                if is_num:
+                    break
+
+            for title, data in Movies.items():
+                movie_genres = data[3:]
+                if all(g in movie_genres for g in multiple_genre):
+                    gen_shows.append(title)
+
+        elif choice == "country":
+            print("    ---- Countries ----    ")
+            for keys, values in Country.items():
+                if int(keys) < 10:
+                    print(f"    0{keys}: {values}")
+                else:
+                    print(f"    {keys}: {values}")
+
+            while True:
+                con = input("Enter country code (q to quit): ")
+                if con.lower() in ["q", "quit"]:
+                    break
+                elif con.isdigit():
+                    if con in Country.keys():
+                        for title,data in dict.items():
+                            if con == data[3:]:
+                                con_shows.append(title)
+                        break
+                else:
+                    print("Please enter a valid country code.")
+
+
+
+
+
+
+
+
+
+
 
     def main_tv():
         while True:
@@ -1156,7 +1293,9 @@ def main():
             print("\nInvalid input.\nPlease try again.")
 
 if __name__ == '__main__':
-    main()
+   main()
+
+
 
 
 #------------------------------------------------------------------------------------------
