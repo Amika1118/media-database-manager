@@ -945,9 +945,11 @@ def tv_series(current_type):
                     f"{i:3}. {title:35} {season:^3}       {begin_year:4}-{end_year:4}     {Country[country]:<8}   {Rating[rating]:{num}}   {', '.join(genre_name):<45}")
 
     def search_tv():
-        print(f"Searching for {current_type} series...\n")
+        print()
+        print(f"Searching for {current_type} series...")
+        print("-" * 30)
         while True:
-            user_input = input("How do you want to search? \n01. By Name \n02. By Released Year \n03. By Genre \n04. By Country \n05. By Rating \n06. Super Search \n07. Exit Search \n - - - - ->")
+            user_input = input("How do you want to search? \n01. By Name \n02. By Released Year \n03. By Genre \n04. By Country \n05. By Rating \n06. Super Search \n07. Exit Search \n - - - - -> ")
             match user_input:
                 case "by name"|"name"|"1"|"01":
                     by_name()
@@ -967,6 +969,9 @@ def tv_series(current_type):
                     print("Please enter a valid number.")
 
     def by_name():
+        print()
+        print("Searching for series by name...")
+        print("-" * 25)
         while True:
             name = input(f"Please enter the first letter of the name of the {current_type} series : ")
             print()
@@ -988,32 +993,42 @@ def tv_series(current_type):
                         print(f"{current_type.capitalize()} series with starting letter {title[0]} not found.")
 
     def by_year(search_type):
+        read_tv()
+        year = []
+        for title,data in dict.items():
+            if len(data[1]) == 4:
+                year.append(data[1])
+            elif len(data[2]) == 4:
+                year.append(data[2])
+
+        year.sort()
+        beg_year = year[0]
+        end_year = year[-1]
+
+
         while True:
-            choice = input(f"How do you want to search by year?\n01. Begin Year of the {current_type.capitalize()} \n02. End Year of the {current_type.capitalize()} \n03. {current_type.capitalize()} shows in a year range\n -----------------------------> ")
+            print()
+            print("Search by Year...")
+            print("-" * 25)
+            choice = input(f"How do you want to search by year? (q to quit)\n01. Begin Year of the {current_type.capitalize()} shows \n02. End Year of the {current_type.capitalize()} shows \n03. {current_type.capitalize()} shows in a year range\n -----------------------------> ")
             if choice in ["01","1","02","2","03","3","begin year","ending year","begin","end","range","year range"]:
-                break
+
+                match choice:
+                    case "1"|"01"|"begin"|"begin year":
+                        by_begin_or_end_year(search_type,"begin",beg_year, end_year)
+                    case "2"|"02"|"end year"|"end":
+                        by_begin_or_end_year(search_type,"end",beg_year, end_year)
+                    case "3"|"03"|"range"|"year range":
+                        by_year_range(search_type,beg_year,end_year)
+                    case "q"|"quit"|"exit":
+                        break
             else:
                 print("Please enter a valid number.")
 
-            match choice:
-                case "1"|"01"|"begin"|"begin year":
-                    by_begin_or_end_year(search_type,"begin")
-                case "2"|"02"|"end year"|"end":
-                    by_begin_or_end_year(search_type,"end")
-                case "3"|"03"|"range"|"year range":
-                    by_year_range(search_type)
 
+    def by_begin_or_end_year(search_type,begin_or_ending,beg_year,end_year):
 
-    def by_begin_or_end_year(search_type,begin_or_ending):
-        year = []
-        for title,data in dict.items():
-            year.append(data[1])
-            year.append(data[2])
-
-        year.sort()
-        beg_year = year.index(0)
-        end_year = year[-1]
-
+        num  = 0
         while True:
             if begin_or_ending == "begin":
                 year_type = 1
@@ -1026,19 +1041,80 @@ def tv_series(current_type):
                 break
             elif year.isdigit() and (int(beg_year) - 1) < int(year) < (int(end_year) + 1):
                 read_tv()
+                print(f"{current_type.capitalize()} shows which {begin_or_ending} in {year}.")
+                print("_" * 25)
                 for title,data in dict.items():
                     if year in data[year_type]:
                         if search_type == "search":
                             print(title)
                         else:
                             year_shows.append(title)
+                        num =+ 1
+                print("_" * 25)
+                print(f"Number of {current_type} shows : {num}")
+                print("_" * 25)
                 input("Press enter to continue...")
                 break
             else:
                 print(f"Please enter a valid year between {beg_year} and {end_year}.\n")
 
-    def by_year_range(search_type):
+    def by_year_range(search_type,beg_year,end_year):
+        while True:
+            year_range = input(f"Enter the year range({beg_year}-{end_year}) : ")
+            if len(year_range) == 9:
+                begin =  year_range[0:4]
+                end = year_range[5:9]
+                if begin > end:
+                    begin_1 = end
+                    end_1 = begin
+                    print()
+                    print("You must enter the begin year first.")
+                    print("As default we'll switch the years")
+                    while True:
+                        print()
+                        choice = input("Do you want to continue? (y/n) : ")
+                        if choice in ["yes","y"]:
+                            year_range_search_engine(search_type,begin_1,end_1)
+                        elif choice in ["no","n"]:
+                            print("We will direct you the main year range menu.")
+                            break
+                        else:
+                            print("Please enter a valid input.")
+                else:
+                    year_range_search_engine(search_type,begin,end)
+                break
+            elif len(year_range) == 0:
+                print(f"Please enter a valid years between {beg_year} and {end_year}.\n")
+
+
+    def year_range_search_engine(search_type,beg_year,end_year):
+        list_of_shows = []
+        num = 0
+        read_tv()
         print()
+        print("-" * 25)
+        print(f"The {current_type} shows aired in between {beg_year} - {end_year}.")
+        print("-" * 25)
+        for title,data in dict.items():
+            if beg_year <= data[1]:
+                if end_year >= data[2]:
+                    if search_type == "search":
+                        list_of_shows.append(title)
+                    else:
+                        year_range_shows.append(title)
+                    num += 1
+
+        list_of_shows.sort()
+        for i in list_of_shows:
+            print(i)
+
+        if list_of_shows.__len__() == 0:
+            print("There are no shows available.")
+
+        print("-" * 25)
+        print(f"There are {num} of {current_type} shows.")
+        print("-" * 25)
+
 
 
     def by_genre():
@@ -1140,6 +1216,7 @@ def tv_series(current_type):
     gen_shows = []
     rate_shows = []
     year_shows = []
+    year_range_shows = []
 
     def super_search_engine(choice):
         read_tv()
