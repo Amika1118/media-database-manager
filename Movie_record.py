@@ -958,9 +958,9 @@ def tv_series(current_type):
                 case "by genre"|"genre"|"3"|"03":
                     by_genre()
                 case "by country"|"country"|"04"|"4":
-                    by_country()
+                    by_country("search")
                 case "by rating"|"rating"|"05"|"5":
-                    by_rating()
+                    by_rating("search")
                 case "super search"|"super"|"06"|"6":
                     super_search_tv()
                 case "exit search"|"exit"|"07"|"7":
@@ -1025,10 +1025,10 @@ def tv_series(current_type):
             else:
                 print("Please enter a valid number.")
 
-
     def by_begin_or_end_year(search_type,begin_or_ending,beg_year,end_year):
-
-        num  = 0
+        num = 0
+        if search_type != "super search":
+            read_tv()
         while True:
             if begin_or_ending == "begin":
                 year_type = 1
@@ -1040,19 +1040,20 @@ def tv_series(current_type):
             if year.lower() in ["q", "quit"]:
                 break
             elif year.isdigit() and (int(beg_year) - 1) < int(year) < (int(end_year) + 1):
-                read_tv()
                 print(f"{current_type.capitalize()} shows which {begin_or_ending} in {year}.")
                 print("_" * 25)
                 for title,data in dict.items():
-                    if year in data[year_type]:
+                    if year == data[year_type]:
                         if search_type == "search":
                             print(title)
-                        else:
+                        elif search_type == "super search":
                             year_shows.append(title)
-                        num =+ 1
+                        num += 1  # Fixed: was num =+ 1
                 print("_" * 25)
                 print(f"Number of {current_type} shows : {num}")
                 print("_" * 25)
+                if search_type == "super search":
+                    break
                 input("Press enter to continue...")
                 break
             else:
@@ -1086,11 +1087,11 @@ def tv_series(current_type):
             elif len(year_range) == 0:
                 print(f"Please enter a valid years between {beg_year} and {end_year}.\n")
 
-
     def year_range_search_engine(search_type,beg_year,end_year):
         list_of_shows = []
         num = 0
-        read_tv()
+        if search_type != "super search":
+            read_tv()
         print()
         print("-" * 25)
         print(f"The {current_type} shows aired in between {beg_year} - {end_year}.")
@@ -1100,22 +1101,23 @@ def tv_series(current_type):
                 if end_year >= data[2]:
                     if search_type == "search":
                         list_of_shows.append(title)
-                    else:
+                    elif search_type == "super search":
                         year_range_shows.append(title)
                     num += 1
 
         list_of_shows.sort()
-        for i in list_of_shows:
-            print(i)
+        if search_type == "search":
+            for i in list_of_shows:
+                print(i)
 
-        if list_of_shows.__len__() == 0:
-            print("There are no shows available.")
+            if list_of_shows.__len__() == 0:
+                print("There are no shows available.")
 
-        print("-" * 25)
-        print(f"There are {num} of {current_type} shows.")
-        print("-" * 25)
-
-
+            print("-" * 25)
+            print(f"There are {num} of {current_type} shows.")
+            print("-" * 25)
+        elif search_type == "super search":
+            print(f"Found {num} shows in year range {beg_year}-{end_year}")
 
     def by_genre():
         for i in Genres:
@@ -1148,34 +1150,57 @@ def tv_series(current_type):
             else:
                 print("Please enter a valid genre.")
 
-    def by_country():
+    def by_country(search_type):
         for i in Country:
             print(f"{i}. {Country[i]}")
 
         while True:
-            read_tv()
+            if search_type != "super search":
+                read_tv()
             country = input(f"Please enter the country or the country code of the {current_type} series (q to quit) : ")
             print()
             if country.lower() in ["q", "quit"]:
                 break
             elif country.isdigit():
                 if country in Country.keys():
-                    for title,data in TvSeries.items():
-                        if country in data[3]:
-                            print(title)
+                    for title,data in dict.items():
+                        if country == data[3]:
+                            if search_type == "search":
+                                print(title)
+                            elif search_type == "super search":
+                                con_shows.append(title)
+                    if search_type == "super search":
+                        print(f"Found {len(con_shows)} shows from {Country[country]}")
+                        break
                     input("Press enter to continue...")
-
+                    break
+                else:
+                    print("Please enter a valid country code.")
             elif country.capitalize() in Country.values():
-                print(f"\nTv Series from {country}.")
-                for title,data in dict.items():
-                    if country in Country[data[3]]:
-                        print(title)
-                input("Press enter to continue...")
-
+                # Find country code
+                country_code = None
+                for key, value in Country.items():
+                    if value == country.capitalize():
+                        country_code = key
+                        break
+                if country_code:
+                    for title,data in dict.items():
+                        if country_code == data[3]:
+                            if search_type == "search":
+                                print(title)
+                            elif search_type == "super search":
+                                con_shows.append(title)
+                    if search_type == "super search":
+                        print(f"Found {len(con_shows)} shows from {country}")
+                        break
+                    input("Press enter to continue...")
+                    break
             else:
                 print("Please enter a valid country code.")
 
-    def by_rating():
+    def by_rating(search_type):
+        if search_type != "super search":
+            read_tv()
         while True:
             rate = input("Enter the rating 1 to 5 (q to quit) : ")
             if rate.lower() in ["q", "quit"]:
@@ -1183,8 +1208,16 @@ def tv_series(current_type):
             elif rate.isdigit():
                 print(f"\n{current_type.capitalize()} series with {Rating[rate]} rating.")
                 for title,data in dict.items():
-                    print(title)
+                    if rate == data[4]:
+                        if search_type == "search":
+                            print(title)
+                        elif search_type == "super search":
+                            rate_shows.append(title)
+                if search_type == "super search":
+                    print(f"Found {len(rate_shows)} shows with rating {Rating[rate]}")
+                    break
                 input("Press enter to continue...")
+                break
             else:
                 print("Please enter a valid rating.")
 
@@ -1207,10 +1240,56 @@ def tv_series(current_type):
         for i in tv:
             print(f"{i}")
 
-    def super_search_tv():
-        user_in = input(f"How do you want search for {current_type}?\n01. By multiple genre \n02. ")
-        user = []
-        super_search_engine("multiple_genre")
+    # def super_search_tv():
+    #     choose_right = False
+    #     user = []
+    #     print(f"These are the types of things you can include in your search for {current_type}?\n01. By multiple genre \n02. By Country \n03. By Rating \n04. By  Year")
+    #     print("-" * 25)
+    #     while True:
+    #         user_in = input("How many of these you would like to include in your search? (q to quit) : ")
+    #         if user_in.lower() in ["q", "quit"]:
+    #             break
+    #         elif user_in.isdigit():
+    #             if user_in.lower() in ["1","2","3","4","01","02","03","04"]:
+    #                 if len(user_in) == 2:
+    #                     num_of_types = user_in[1]
+    #                 else:
+    #                     num_of_types = user_in
+    #
+    #                 for i in num_of_types:
+    #                     while True:
+    #                         print()
+    #                         print("-" * 30)
+    #                         users_search_types = input("What are the types you want to include in your search?\n01. By multiple genre \n02. By Country \n03. By Rating \n04. By  Year\n05. Quit super search")
+    #                         print("-" * 30)
+    #
+    #                         if users_search_types in ["1","01","multiple genre"]:
+    #                             user.append("1")
+    #                             choose_right = True
+    #                             break
+    #                         elif users_search_types in ["2","02","country"]:
+    #                             user.append("2")
+    #                             choose_right = True
+    #                             break
+    #                         elif users_search_types in ["3","03","rating"]:
+    #                             user.append("3")
+    #                             choose_right = True
+    #                             break
+    #                         elif users_search_types in ["4","04","year"]:
+    #                             user.append("4")
+    #                             choose_right = True
+    #                             break
+    #                         elif users_search_types in ["5","05","quit","exit"]:
+    #                             print(f"You're choosing to quit from super search search for {current_type.capitalize()} shows.\n")
+    #                             return
+    #                         else:
+    #                             print("Please enter a valid number between 1 and 5.")
+    #
+    #     if choose_right:
+    #         super_search_engine(user,"super search")
+
+
+    #super search lists.
 
     con_shows = []
     gen_shows = []
@@ -1218,90 +1297,224 @@ def tv_series(current_type):
     year_shows = []
     year_range_shows = []
 
-    def super_search_engine(choice):
-        read_tv()
-        multiple_genre = []
+    def super_search_tv():
+        choose_right = False
+        user = []
+        print(
+            f"These are the types of things you can include in your search for {current_type}?\n01. By multiple genre \n02. By Country \n03. By Rating \n04. By Year")
+        print("-" * 25)
+
+        while True:
+            user_in = input("How many of these you would like to include in your search? (q to quit) : ")
+            if user_in.lower() in ["q", "quit"]:
+                return
+
+            if user_in.isdigit() and 1 <= int(user_in) <= 4:
+                num_of_types = int(user_in)
+
+                for i in range(num_of_types):
+                    while True:
+                        print()
+                        print("-" * 30)
+                        users_search_types = input(
+                            f"What is type {i + 1} you want to include in your search?\n01. By multiple genre \n02. By Country \n03. By Rating \n04. By Year\n05. Quit super search\n -----------------------------> ")
+                        print("-" * 30)
+
+                        if users_search_types in ["1", "01", "multiple genre"]:
+                            if "1" not in user:  # Avoid duplicates
+                                user.append("1")
+                                choose_right = True
+                                break
+                            else:
+                                print("You already selected multiple genre.")
+                        elif users_search_types in ["2", "02", "country"]:
+                            if "2" not in user:  # Avoid duplicates
+                                user.append("2")
+                                choose_right = True
+                                break
+                            else:
+                                print("You already selected country.")
+                        elif users_search_types in ["3", "03", "rating"]:
+                            if "3" not in user:  # Avoid duplicates
+                                user.append("3")
+                                choose_right = True
+                                break
+                            else:
+                                print("You already selected rating.")
+                        elif users_search_types in ["4", "04", "year"]:
+                            if "4" not in user:  # Avoid duplicates
+                                user.append("4")
+                                choose_right = True
+                                break
+                            else:
+                                print("You already selected year.")
+                        elif users_search_types in ["5", "05", "quit", "exit"]:
+                            print(f"You're choosing to quit from super search for {current_type.capitalize()} shows.\n")
+                            return
+                        else:
+                            print("Please enter a valid number between 1 and 5.")
+                break
+            else:
+                print("Please enter a number between 1 and 4.")
+
+        if choose_right:
+            super_search_engine(user, "super search")
+
+    def super_search_engine(listing, search_type):
+        # Clear all lists first
         con_shows.clear()
         gen_shows.clear()
         rate_shows.clear()
-        is_num = False
+        year_shows.clear()
+        year_range_shows.clear()
 
-        if choice == "multiple_genre":
-            while True:
-                num = input("Enter the number of genres: ")
-                if num.isdigit():
-                    num = int(num)
-                    if num > 0:
-                        print("    ---- Genres ----    ")
-                        for key, value in Genres.items():
-                            i = int(key)
-                            if i < 10:
-                                print(f"    0{key} : {value}")
-                            else:
-                                print(f"    {key} : {value}")
-                        print()
+        # Load data once at the beginning for super search
+        read_tv()
 
-                        for number in range(num):
-                            while True:
-                                try:
-                                    genre = int(input("Enter the genre (0 to quit): "))
-                                    if str(genre) in Genres.keys():
-                                        if str(genre) not in multiple_genre:
-                                            multiple_genre.append(str(genre))
-                                            break
+        # Process each criterion in the list
+        for criterion in listing:
+            if criterion == "1":  # Multiple genres
+                multiple_genre = []
+                print("\n" + "-" * 30)
+                print("SELECT MULTIPLE GENRES")
+                print("-" * 30)
+
+                while True:
+                    num = input("Enter the number of genres you want to search by: ")
+                    if num.isdigit():
+                        num = int(num)
+                        if num > 0:
+                            print("\n    ---- Available Genres ----    ")
+                            for key, value in Genres.items():
+                                i = int(key)
+                                if i < 10:
+                                    print(f"    0{key} : {value}")
+                                else:
+                                    print(f"    {key} : {value}")
+                            print()
+
+                            for number in range(num):
+                                while True:
+                                    try:
+                                        genre = input(f"Enter genre {number + 1} code (01-20): ")
+                                        if genre in Genres.keys():
+                                            if genre not in multiple_genre:
+                                                multiple_genre.append(genre)
+                                                print(f"Added: {Genres[genre]}")
+                                                break
+                                            else:
+                                                print("You have already entered this genre.")
                                         else:
-                                            print("You have already entered this genre.")
-                                    elif genre == 0 and multiple_genre.__len__() > 0:
-                                        break
-                                    else:
-                                        print("You must enter a at least one genre before quitting.")
-
-                                except ValueError:
-                                    print("Please enter a valid genre key.")
-                        is_num = True
+                                            print("Please enter a valid genre code (01-20).")
+                                    except ValueError:
+                                        print("Please enter a valid genre code.")
+                            break
+                        else:
+                            print("Please enter a number higher than 0")
                     else:
-                        print("Please enter a number higher than 0")
+                        print("Please enter a valid number.")
+
+                # Find shows matching ALL selected genres
+                for title, data in dict.items():
+                    show_genres = data[5:]  # Genres start at index 5
+                    # Check if ALL selected genres are in this show's genres
+                    if all(g in show_genres for g in multiple_genre):
+                        gen_shows.append(title)
+
+                print(f"\nFound {len(gen_shows)} shows matching ALL selected genres")
+
+            elif criterion == "2":  # Country
+                by_country(search_type)
+
+            elif criterion == "3":  # Rating
+                by_rating(search_type)
+
+            elif criterion == "4":  # Year
+                by_year(search_type)
+
+        # After collecting all criteria, find the intersection
+        print_super_search_results()
+
+    def print_super_search_results():
+        """Find and display shows that match ALL selected criteria"""
+        print("\n" + "=" * 60)
+        print("SUPER SEARCH RESULTS")
+        print("=" * 60)
+
+        # Combine year_shows and year_range_shows if both exist
+        all_year_shows = []
+        if year_shows:
+            all_year_shows = year_shows.copy()
+        if year_range_shows:
+            if all_year_shows:
+                # Find intersection of year_shows and year_range_shows
+                all_year_shows = list(set(all_year_shows) & set(year_range_shows))
+            else:
+                all_year_shows = year_range_shows.copy()
+
+        # Create a list of all non-empty result sets
+        result_sets = []
+
+        if gen_shows:
+            result_sets.append(set(gen_shows))
+
+        if con_shows:
+            result_sets.append(set(con_shows))
+
+        if rate_shows:
+            result_sets.append(set(rate_shows))
+
+        if all_year_shows:
+            result_sets.append(set(all_year_shows))
+
+        # Find the intersection of ALL sets (shows that match ALL criteria)
+        if not result_sets:
+            print("No criteria were selected.")
+            print("=" * 60)
+            return
+
+        # Start with first set and intersect with others
+        common_shows = result_sets[0]
+        for i in range(1, len(result_sets)):
+            common_shows = common_shows.intersection(result_sets[i])
+
+        # Convert back to sorted list
+        final_results = sorted(list(common_shows))
+
+        # Display results
+        if not final_results:
+            print("No shows found matching ALL your criteria.")
+            print("\nIndividual criteria matches:")
+            print(f"  - Genre matches: {len(gen_shows) if gen_shows else 0} shows")
+            print(f"  - Country matches: {len(con_shows) if con_shows else 0} shows")
+            print(f"  - Rating matches: {len(rate_shows) if rate_shows else 0} shows")
+            print(f"  - Year matches: {len(all_year_shows) if all_year_shows else 0} shows")
+        else:
+            print(f"Found {len(final_results)} show(s) matching ALL criteria:\n")
+
+            for i, show_title in enumerate(final_results, 1):
+                # Get show details from dictionary
+                show_data = dict[show_title]
+
+                # Format output
+                if i < 10:
+                    prefix = f"0{i}."
                 else:
-                    print("Please enter a valid number.")
+                    prefix = f"{i}."
 
-                if is_num:
-                    break
+                print(f"{prefix} {show_title}")
+                print(f"   Years: {show_data[1]}-{show_data[2]} | Seasons: {show_data[0]}")
+                print(f"   Country: {Country[show_data[3]]} | Rating: {Rating[show_data[4]]}")
 
-            for title, data in Movies.items():
-                movie_genres = data[3:]
-                if all(g in movie_genres for g in multiple_genre):
-                    gen_shows.append(title)
+                # Show genres
+                if len(show_data) > 5:
+                    genre_names = [Genres[g] for g in show_data[5:] if g in Genres]
+                    print(f"   Genres: {', '.join(genre_names)}")
 
-        elif choice == "country":
-            print("    ---- Countries ----    ")
-            for keys, values in Country.items():
-                if int(keys) < 10:
-                    print(f"    0{keys}: {values}")
-                else:
-                    print(f"    {keys}: {values}")
+                print()
 
-            while True:
-                con = input("Enter country code (q to quit): ")
-                if con.lower() in ["q", "quit"]:
-                    break
-                elif con.isdigit():
-                    if con in Country.keys():
-                        for title,data in dict.items():
-                            if con == data[3:]:
-                                con_shows.append(title)
-                        break
-                else:
-                    print("Please enter a valid country code.")
-
-
-
-
-
-
-
-
-
-
+        print("=" * 60)
+        input("\nPress Enter to continue...")
 
     def main_tv():
         while True:
