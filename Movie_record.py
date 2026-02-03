@@ -23,6 +23,7 @@ Genres = {
           "18":"SitCom",
           "19":"Western",
           "20":"Mystery",
+          "21":"War",
           }
 Country = {
           "0":"N/A",
