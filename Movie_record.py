@@ -24,6 +24,7 @@ Genres = {
           "19":"Western",
           "20":"Mystery",
           "21":"War",
+          "22":"Satire",
           }
 Country = {
           "0":"N/A",
@@ -250,6 +251,7 @@ def movies():
     def search_by_name():
         read_movies()
         while True:
+            movie_count = 0
             letter = input("\nEnter the first letter: ").capitalize()
             print()
 
@@ -294,6 +296,11 @@ def movies():
                     if title[0] == letter.capitalize():
                         print(title)
                         i = i + 1
+                        movie_count += 1
+                print()
+                print("-" * 30)
+                print(f"There are {movie_count} movies starting with letter `{letter.capitalize()}`.")
+                print("-" * 30)
                 print()
 
                 if i < 1:
