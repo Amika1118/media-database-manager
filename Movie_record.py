@@ -25,6 +25,7 @@ Genres = {
           "20":"Mystery",
           "21":"War",
           "22":"Satire",
+          "23": "Adventure",
           }
 Country = {
           "0":"N/A",
