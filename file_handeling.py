@@ -1,26 +1,23 @@
-import csv
 import os
-
+import csv
 
 def reader(directory, file_path):
     directory.clear()
-    with open(file_path, "r", newline="") as csvfile:
-        reader = csv.reader(csvfile)
-        for row in reader:
-            if row:
-                content_id = row[0]
-                title = row[1]
-                comment = row[2]
-                directory[content_id] = [title] + [comment]
+    try:
+        with open(file_path, "r", newline="") as f:
+            for row in csv.reader(f):
+                if row and len(row) >= 3:          # safety check
+                    content_id = row[0]
+                    directory[content_id] = row[1:]  # stores all trailing columns
+    except FileNotFoundError:
+        pass   # file doesn't exist yet – that's fine
 
 
 def writer(directory, file_path):
-    with open(file_path, "w", newline="") as csvfile:  # clear file safely
-
-        writer = csv.writer(csvfile)
-        for content_id in directory:
-            print(f"{content_id}, {directory[content_id]}")
-            writer.writerow([content_id] + directory[content_id])
+    with open(file_path, "w", newline="") as f:
+        w = csv.writer(f)
+        for content_id, data in directory.items():
+            w.writerow([content_id] + data)
 
 
 
