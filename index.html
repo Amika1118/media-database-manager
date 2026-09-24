@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport">
+    <title>Media Archive | Movie / TV / Anime Recorder</title>
+    <link href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxMTEzMWIiLz4KICA8Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSIyMiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZTNiMzRlIiBzdHJva2Utd2lkdGg9IjUiLz4KICA8Y2lyY2xlIGN4PSIzMiIgY3k9IjE0IiByPSI2IiBmaWxsPSIjMjAyMzJmIiBzdHJva2U9IiNlM2IzNGUiIHN0cm9rZS13aWR0aD0iMi41Ii8+CiAgPGNpcmNsZSBjeD0iMTUiIGN5PSI0MiIgcj0iNiIgZmlsbD0iIzIwMjMyZiIgc3Ryb2tlPSIjZTNiMzRlIiBzdHJva2Utd2lkdGg9IjIuNSIvPgogIDxjaXJjbGUgY3g9IjQ5IiBjeT0iNDIiIHI9IjYiIGZpbGw9IiMyMDIzMmYiIHN0cm9rZT0iI2UzYjM0ZSIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KICA8Y2lyY2xlIGN4PSIzMiIgY3k9IjMyIiByPSI1LjUiIGZpbGw9IiNlM2IzNGUiLz4KPC9zdmc+Cg==" rel="icon"
+          type="image/svg+xml">
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+          rel="stylesheet">
+    <style>
+        :root {
+            --bg: #11131b;
+            --surface: #1a1d29;
+            --surface-2: #20232f;
+            --ink: #ece7dd;
+            --ink-dim: #9498a8;
+            --gold: #e3b34e;
+            --rewind: #c4453a;
+            --line: #2c2f3d;
+            --display: 'Bebas Neue', Impact, 'Arial Narrow', sans-serif;
+            --body: 'Inter', system-ui, -apple-system, sans-serif;
+            --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px);
+        }
+
+        *, *::before, *::after {
+            box-sizing: inherit
+        }
+
+        html, body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: var(--body);
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased
+        }
+
+        img {
+            max-width: 100%
+        }
+
+        .wrap {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 24px
+        }
+
+        a {
+            color: inherit
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 3px
+        }
+
+        /* ---------- preloader ---------- */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 22px;
+            transition: opacity .5s ease, visibility .5s ease;
+        }
+
+        #preloader.done {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none
+        }
+
+        .reel {
+            width: 64px;
+            height: 64px;
+            animation: spin 1.1s linear infinite
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        #preload-status {
+            font-family: var(--mono);
+            font-size: .8rem;
+            color: var(--ink-dim);
+            letter-spacing: .02em;
+            min-height: 1.2em
+        }
+
+        #preload-bar {
+            width: 180px;
+            height: 2px;
+            background: var(--line);
+            overflow: hidden;
+            border-radius: 2px
+        }
+
+        #preload-bar span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: var(--gold);
+            transition: width .35s ease
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reel {
+                animation: none
+            }
+
+            #preloader {
+                transition: none
+            }
+        }
+
+        /* ---------- motion ---------- */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px)
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0
+            }
+            to {
+                opacity: 1
+            }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity .6s cubic-bezier(.2, .7, .2, 1), transform .6s cubic-bezier(.2, .7, .2, 1)
+        }
+
+        .reveal.in-view {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        .hero-copy > * {
+            opacity: 0;
+            animation: fadeUp .7s cubic-bezier(.2, .7, .2, 1) forwards
+        }
+
+        .hero-copy > *:nth-child(1) {
+            animation-delay: .05s
+        }
+
+        .hero-copy > *:nth-child(2) {
+            animation-delay: .15s
+        }
+
+        .hero-copy > *:nth-child(3) {
+            animation-delay: .25s
+        }
+
+        .term {
+            opacity: 0;
+            animation: fadeIn .8s ease .3s forwards
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hero-copy > *, .term, .reveal {
+                animation: none !important;
+                transition: none !important;
+                opacity: 1 !important;
+                transform: none !important
+            }
+        }
+
+        /* ---------- header ---------- */
+        header {
+            padding: 28px 0 8px
+        }
+
+        .brand {
+            display: flex;
+            align-items: baseline;
+            gap: 10px
+        }
+
+        .brand-mark {
+            font-family: var(--display);
+            font-size: 1.5rem;
+            letter-spacing: .03em;
+            color: var(--gold)
+        }
+
+        .brand-sub {
+            font-family: var(--mono);
+            font-size: .72rem;
+            color: var(--ink-dim)
+        }
+
+        /* ---------- hero ---------- */
+        .hero {
+            padding: 48px 0 64px;
+            display: grid;
+            grid-template-columns:1.1fr 1fr;
+            gap: 48px;
+            align-items: center
+        }
+
+        h1 {
+            font-family: var(--display);
+            font-weight: 400;
+            font-size: clamp(2.6rem, 6vw, 4rem);
+            line-height: 1.02;
+            letter-spacing: .01em;
+            margin: 0 0 18px
+        }
+
+        .lede {
+            color: var(--ink-dim);
+            font-size: 1.05rem;
+            max-width: 46ch;
+            margin: 0 0 26px
+        }
+
+        .stat-row {
+            display: flex;
+            flex-wrap: wrap;
+            row-gap: 16px;
+            column-gap: 28px;
+            font-family: var(--mono)
+        }
+
+        .stat {
+            transition: transform .25s ease
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .stat:hover {
+                transform: translateY(-3px)
+            }
+        }
+
+        .stat b {
+            display: block;
+            color: var(--gold);
+            font-size: 1.3rem;
+            font-weight: 500;
+            transition: text-shadow .25s ease
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .stat:hover b {
+                text-shadow: 0 0 12px rgba(227, 179, 78, .5)
+            }
+        }
+
+        .stat span {
+            font-size: .72rem;
+            color: var(--ink-dim)
+        }
+
+        .term {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .6)
+        }
+
+        .term-bar {
+            display: flex;
+            gap: 6px;
+            padding: 10px 14px;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--line)
+        }
+
+        .term-bar i {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--line)
+        }
+
+        .term-body {
+            font-family: var(--mono);
+            font-size: .76rem;
+            color: var(--ink-dim);
+            padding: 18px 20px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            line-height: 1.65
+        }
+
+        .term-body b {
+            color: var(--ink);
+            font-weight: 500
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 7px;
+            height: 14px;
+            background: var(--gold);
+            vertical-align: -2px;
+            animation: blink 1s step-end infinite
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0
+            }
+        }
+
+        /* ---------- section shell ---------- */
+        section {
+            padding: 56px 0;
+            border-top: 1px solid var(--line)
+        }
+
+        .eyebrow {
+            font-family: var(--mono);
+            font-size: .72rem;
+            color: var(--gold);
+            margin: 0 0 6px
+        }
+
+        h2 {
+            font-family: var(--display);
+            font-weight: 400;
+            font-size: 1.9rem;
+            letter-spacing: .01em;
+            margin: 0 0 30px
+        }
+
+        /* ---------- catalog ledger ---------- */
+        .row {
+            display: grid;
+            grid-template-columns:34px 1fr 70px 90px 120px;
+            gap: 14px;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--line);
+            transition: transform .25s ease, background-color .25s ease, padding-left .25s ease;
+            border-radius: 4px
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .row:hover {
+                background: var(--surface);
+                transform: translateX(6px)
+            }
+
+            .row:hover .stars {
+                text-shadow: 0 0 10px rgba(227, 179, 78, .55)
+            }
+        }
+
+        .row:first-child {
+            border-top: 1px solid var(--line)
+        }
+
+        .num {
+            font-family: var(--mono);
+            color: var(--ink-dim);
+            font-size: .8rem
+        }
+
+        .title {
+            font-weight: 500
+        }
+
+        .genres {
+            color: var(--ink-dim);
+            font-size: .85rem;
+            grid-column: 2 / span 4;
+            margin-top: 2px
+        }
+
+        .year, .country {
+            font-family: var(--mono);
+            font-size: .82rem;
+            color: var(--ink-dim)
+        }
+
+        .stars {
+            color: var(--gold);
+            letter-spacing: 1px;
+            font-size: .85rem
+        }
+
+        /* ---------- specs ---------- */
+        .spec {
+            display: grid;
+            grid-template-columns:200px 1fr;
+            gap: 20px;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--line);
+            transition: transform .25s ease, border-color .25s ease
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .spec:hover {
+                transform: translateX(6px);
+                border-color: var(--gold)
+            }
+        }
+
+        .spec:first-child {
+            border-top: 1px solid var(--line)
+        }
+
+        .spec h3 {
+            font-family: var(--body);
+            font-weight: 600;
+            font-size: .95rem;
+            margin: 0
+        }
+
+        .spec p {
+            margin: 0;
+            color: var(--ink-dim);
+            font-size: .92rem;
+            max-width: 56ch
+        }
+
+        /* ---------- quickstart ---------- */
+        pre.code {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 18px 20px;
+            font-family: var(--mono);
+            font-size: .82rem;
+            color: var(--ink);
+            overflow-x: auto;
+            margin: 0
+        }
+
+        pre.code .c {
+            color: var(--ink-dim)
+        }
+
+        footer {
+            padding: 32px 0 0;
+            color: var(--ink-dim);
+            font-size: .82rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px
+        }
+
+        .credit {
+            border-top: 1px solid var(--line);
+            margin-top: 32px;
+            padding: 32px 0 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            text-align: center
+        }
+
+        .credit-line {
+            color: var(--ink-dim);
+            font-size: .9rem
+        }
+
+        .credit-line a {
+            color: var(--gold);
+            font-weight: 600;
+            text-decoration: underline;
+            text-underline-offset: 3px
+        }
+
+        .credit-links {
+            display: flex;
+            gap: 26px;
+            flex-wrap: wrap;
+            justify-content: center
+        }
+
+        .credit-links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--ink-dim);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            font-size: .88rem
+        }
+
+        .credit-links svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--ink-dim);
+            fill: none;
+            transition: stroke .2s ease, transform .2s ease
+        }
+
+        .credit-links svg.icon-fill {
+            stroke: none;
+            fill: var(--ink-dim);
+            transition: fill .2s ease, transform .2s ease
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .credit-links a:hover svg {
+                stroke: var(--gold);
+                transform: translateY(-2px)
+            }
+
+            .credit-links a:hover svg.icon-fill {
+                fill: var(--gold)
+            }
+        }
+
+        @media (max-width: 720px) {
+            .hero {
+                grid-template-columns:1fr
+            }
+
+            .row {
+                grid-template-columns:24px 1fr 60px;
+                row-gap: 4px
+            }
+
+            .country, .stars {
+                grid-column: 2 / span 2
+            }
+
+            .genres {
+                grid-column: 2 / span 2
+            }
+
+            .spec {
+                grid-template-columns:1fr
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="preloader">
+    <svg class="reel" fill="none" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="26" stroke="#2c2f3d" stroke-width="4"/>
+        <circle cx="32" cy="32" r="26" stroke="#e3b34e" stroke-dasharray="40 200" stroke-linecap="round"
+                stroke-width="4"/>
+        <circle cx="32" cy="14" fill="#20232f" r="6" stroke="#2c2f3d" stroke-width="2"/>
+        <circle cx="16" cy="42" fill="#20232f" r="6" stroke="#2c2f3d" stroke-width="2"/>
+        <circle cx="48" cy="42" fill="#20232f" r="6" stroke="#2c2f3d" stroke-width="2"/>
+        <circle cx="32" cy="32" fill="#e3b34e" r="5"/>
+    </svg>
+    <div id="preload-bar"><span id="preload-bar-fill"></span></div>
+    <div id="preload-status">Reading Movies.csv…</div>
+</div>
+
+<div class="wrap">
+    <header>
+        <div class="brand"><span class="brand-mark">MEDIA ARCHIVE</span><span class="brand-sub">/ CLI Recorder</span>
+        </div>
+    </header>
+
+    <section class="hero" style="border-top:none">
+        <div class="hero-copy">
+            <h1>Your watchlist, catalogued like film stock.</h1>
+            <p class="lede">A command-line recorder for movies, TV series and anime - genres, countries and star ratings
+                kept in plain CSV, searchable in seconds.</p>
+            <div class="stat-row">
+                <div class="stat"><b>20+</b><span>genres</span></div>
+                <div class="stat"><b>13+</b><span>countries</span></div>
+                <div class="stat"><b>3</b><span>media types</span></div>
+                <div class="stat"><b>0</b><span>dependencies</span></div>
+            </div>
+        </div>
+        <div class="term">
+            <div class="term-bar"><i></i><i></i><i></i></div>
+            <div class="term-body">--------------------------------------------------
+                ----- <b>Welcome to Movies Recorder</b> -----
+                --------------------------------------------------
+                01. Enter a movie to the database
+                02. Print all the movies in the database
+                03. Search for a movie
+                04. Sort the movies alphabetically
+                05. Exit
+                --------------------------------------------------
+                &gt; <span class="cursor"></span></div>
+        </div>
+    </section>
+
+    <section id="catalog">
+        <p class="eyebrow reveal">Now cataloguing</p>
+        <h2 class="reveal">Five entries from the archive</h2>
+
+        <div class="row reveal">
+            <span class="num">01</span>
+            <span class="title">The Matrix<div class="genres">Action, Science Fiction</div></span>
+            <span class="year">1999</span>
+            <span class="country">America</span>
+            <span class="stars">★★★★★</span>
+        </div>
+        <div class="row reveal">
+            <span class="num">02</span>
+            <span class="title">Spirited Away<div class="genres">Animated, Fantasy</div></span>
+            <span class="year">2001</span>
+            <span class="country">Japan</span>
+            <span class="stars">★★★★★</span>
+        </div>
+        <div class="row reveal">
+            <span class="num">03</span>
+            <span class="title">Inception<div class="genres">Action, Sci-Fi, Thriller</div></span>
+            <span class="year">2010</span>
+            <span class="country">America</span>
+            <span class="stars">★★★★</span>
+        </div>
+        <div class="row reveal">
+            <span class="num">04</span>
+            <span class="title">Before We Go<div class="genres">Romantic</div></span>
+            <span class="year">2019</span>
+            <span class="country">America</span>
+            <span class="stars">★★★★</span>
+        </div>
+        <div class="row reveal">
+            <span class="num">05</span>
+            <span class="title">Finding You<div class="genres">Romantic</div></span>
+            <span class="year">2021</span>
+            <span class="country">America</span>
+            <span class="stars">★★★★</span>
+        </div>
+    </section>
+
+    <section id="specs">
+        <p class="eyebrow reveal">What it does</p>
+        <h2 class="reveal">Built for a growing collection</h2>
+
+        <div class="spec reveal">
+            <h3>Multi-type management</h3>
+            <p>Movies, TV series and anime each get their own database, so a season count or airing status never gets
+                mixed in with a runtime.</p>
+        </div>
+        <div class="spec reveal">
+            <h3>Search, five ways</h3>
+            <p>Look up a title by name, year, or genre - or run a super search that combines genre, country, year and
+                rating at once.</p>
+        </div>
+        <div class="spec reveal">
+            <h3>Rating and metadata</h3>
+            <p>Every entry carries a 1–5 star rating, one or more genres from 20 categories, and a country of origin
+                from 13 and counting.</p>
+        </div>
+        <div class="spec reveal">
+            <h3>Plain CSV storage</h3>
+            <p>No server, no database engine - entries live in editable CSV files that are created automatically on
+                first run.</p>
+        </div>
+    </section>
+
+    <section id="start">
+        <p class="eyebrow reveal">Get it running</p>
+        <h2 class="reveal">Two commands and Python</h2>
+        <pre class="code reveal"><span class="c"># clone and run - no external dependencies</span>
+git clone https://github.com/yourusername/media-database-manager.git
+cd media-database-manager
+python Movie_record.py</pre>
+    </section>
+
+    <div class="credit reveal">
+        <p class="credit-line">Made with <span style="color:var(--rewind)">♥</span> by <a
+                href="https://github.com/amika1118" rel="noopener" target="_blank">Amika Alankara</a></p>
+        <div class="credit-links">
+            <a href="https://github.com/amika1118" rel="noopener" target="_blank">
+                <svg class="icon-fill" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49v-1.9c-2.78.62-3.37-1.37-3.37-1.37-.46-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.34 1.12 2.91.86.09-.66.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.05 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.73 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.9-1.33 2.74-1.05 2.74-1.05.55 1.42.2 2.47.1 2.73.64.72 1.03 1.63 1.03 2.75 0 3.92-2.35 4.79-4.58 5.04.36.32.68.94.68 1.9v2.82c0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2Z"/>
+                </svg>
+                GitHub
+            </a>
+            <a href="https://www.linkedin.com/in/amika-ranmeth/" rel="noopener" target="_blank">
+                <svg stroke-width="1.6" viewBox="0 0 24 24">
+                    <rect height="18" rx="2" width="18" x="3" y="3"/>
+                    <line x1="7.5" x2="7.5" y1="10" y2="17"/>
+                    <circle cx="7.5" cy="6.8" r="1"/>
+                    <path d="M11.5 17v-7"/>
+                    <path d="M11.5 12.8c0-1.8 1.3-2.8 2.8-2.8 1.8 0 2.7 1.2 2.7 3.4V17"/>
+                </svg>
+                LinkedIn
+            </a>
+            <a href="https://amika-alankara-portfolio.vercel.app/" rel="noopener" target="_blank">
+                <svg stroke-width="1.6" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9"/>
+                    <ellipse cx="12" cy="12" rx="4" ry="9"/>
+                    <line x1="3" x2="21" y1="12" y2="12"/>
+                </svg>
+                Portfolio
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <span>Python 3.6+ · MIT License</span>
+        <span>Movies.csv · TvSeries.csv · Anime.csv</span>
+    </footer>
+</div>
+
+<script>
+    (function () {
+        var statusEl = document.getElementById('preload-status');
+        var barEl = document.getElementById('preload-bar-fill');
+        var pre = document.getElementById('preloader');
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var steps = [
+            'Reading Movies.csv…',
+            'Reading TvSeries.csv…',
+            'Reading Anime.csv…',
+            'Indexing 20 genres…',
+            'Mapping 13 countries…',
+            'Ready.'
+        ];
+        if (reduce) {
+            pre.classList.add('done');
+            return;
+        }
+        var i = 0;
+
+        function step() {
+            statusEl.textContent = steps[i];
+            barEl.style.width = Math.round(((i + 1) / steps.length) * 100) + '%';
+            i++;
+            if (i < steps.length) {
+                setTimeout(step, 300);
+            } else {
+                setTimeout(function () {
+                    pre.classList.add('done');
+                }, 350);
+            }
+        }
+
+        step();
+    })();
+
+    (function () {
+        var items = document.querySelectorAll('.reveal');
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce || !('IntersectionObserver' in window)) {
+            items.forEach(function (el) {
+                el.classList.add('in-view');
+            });
+            return;
+        }
+        var groups = {};
+        items.forEach(function (el) {
+            var parent = el.closest('section') || el.parentElement;
+            var key = parent ? Array.prototype.indexOf.call(document.querySelectorAll('section, .credit'), parent) : 0;
+            groups[key] = groups[key] || [];
+            groups[key].push(el);
+        });
+        var delayed = new WeakMap();
+        Object.keys(groups).forEach(function (key) {
+            groups[key].forEach(function (el, i) {
+                delayed.set(el, i * 80);
+            });
+        });
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    var el = entry.target;
+                    setTimeout(function () {
+                        el.classList.add('in-view');
+                    }, delayed.get(el) || 0);
+                    observer.unobserve(el);
+                }
+            });
+        }, {threshold: 0.15, rootMargin: '0px 0px -40px 0px'});
+        items.forEach(function (el) {
+            observer.observe(el);
+        });
+    })();
+</script>
+
+</body>
+</html>
