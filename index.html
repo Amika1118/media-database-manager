@@ -10,7 +10,6 @@
     <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
           rel="stylesheet">
-
     <style>
         :root {
             --bg: #11131b;
@@ -169,29 +168,53 @@
 
         .hero-copy > * {
             opacity: 0;
-            animation: fadeUp .7s cubic-bezier(.2, .7, .2, 1) forwards
+            transform: translateY(16px);
+            transition: opacity .7s cubic-bezier(.2, .7, .2, 1), transform .7s cubic-bezier(.2, .7, .2, 1)
         }
 
-        .hero-copy > *:nth-child(1) {
-            animation-delay: .05s
+        body.loaded .hero-copy > * {
+            opacity: 1;
+            transform: translateY(0)
         }
 
-        .hero-copy > *:nth-child(2) {
-            animation-delay: .15s
+        body.loaded .hero-copy > *:nth-child(1) {
+            transition-delay: .05s
         }
 
-        .hero-copy > *:nth-child(3) {
-            animation-delay: .25s
+        body.loaded .hero-copy > *:nth-child(2) {
+            transition-delay: .15s
         }
 
-        .term {
+        body.loaded .hero-copy > *:nth-child(3) {
+            transition-delay: .25s
+        }
+
+        .hero .term {
             opacity: 0;
-            animation: fadeIn .8s ease .3s forwards
+            transform: translateY(16px) scale(.98);
+            transition: opacity .8s ease, transform .8s ease;
+            transition-delay: .3s
+        }
+
+        body.loaded .hero .term {
+            opacity: 1;
+            transform: translateY(0) scale(1)
+        }
+
+        .tline {
+            display: block;
+            opacity: 0;
+            transform: translateX(-6px);
+            transition: opacity .35s ease, transform .35s ease
+        }
+
+        body.loaded .tline {
+            opacity: 1;
+            transform: translateX(0)
         }
 
         @media (prefers-reduced-motion: reduce) {
-            .hero-copy > *, .term, .reveal {
-                animation: none !important;
+            .hero-copy > *, .hero .term, .reveal, .tline {
                 transition: none !important;
                 opacity: 1 !important;
                 transform: none !important
@@ -270,6 +293,7 @@
             color: var(--gold);
             font-size: 1.3rem;
             font-weight: 500;
+            font-variant-numeric: tabular-nums;
             transition: text-shadow .25s ease
         }
 
@@ -294,10 +318,22 @@
 
         .term-bar {
             display: flex;
+            align-items: center;
             gap: 6px;
             padding: 10px 14px;
             background: var(--surface-2);
             border-bottom: 1px solid var(--line)
+        }
+
+        .term-bar-title {
+            font-family: var(--mono);
+            font-size: .7rem;
+            color: var(--ink-dim);
+            margin-left: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1
         }
 
         .term-bar i {
@@ -334,6 +370,83 @@
         @keyframes blink {
             50% {
                 opacity: 0
+            }
+        }
+
+        .demo-body {
+            height: 320px;
+            overflow-y: auto;
+            scroll-behavior: smooth
+        }
+
+        .demo-body div {
+            margin: 0 0 2px
+        }
+
+        .out-heading {
+            color: var(--ink);
+            font-weight: 500
+        }
+
+        .out-dim {
+            color: var(--ink-dim)
+        }
+
+        .out-gold {
+            color: var(--gold)
+        }
+
+        .demo-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-top: 1px solid var(--line);
+            transition: border-color .2s ease
+        }
+
+        .demo-input-row:focus-within {
+            border-top-color: var(--gold)
+        }
+
+        .demo-input-row .chevron {
+            color: var(--gold);
+            font-family: var(--mono);
+            font-size: .85rem
+        }
+
+        .demo-input {
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--ink);
+            font-family: var(--mono);
+            font-size: .85rem
+        }
+
+        .demo-input::placeholder {
+            color: var(--ink-dim)
+        }
+
+        .demo-restart {
+            margin-top: 16px;
+            background: none;
+            border: 1px solid var(--line);
+            color: var(--ink-dim);
+            font-family: var(--mono);
+            font-size: .78rem;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: border-color .2s ease, color .2s ease
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .demo-restart:hover {
+                border-color: var(--gold);
+                color: var(--gold)
             }
         }
 
@@ -593,25 +706,44 @@
             <p class="lede">A command-line recorder for movies, TV series and anime - genres, countries and star ratings
                 kept in plain CSV, searchable in seconds.</p>
             <div class="stat-row">
-                <div class="stat"><b>20+</b><span>genres</span></div>
-                <div class="stat"><b>13+</b><span>countries</span></div>
-                <div class="stat"><b>3</b><span>media types</span></div>
+                <div class="stat"><b><span class="num-val" data-target="20">0</span>+</b><span>genres</span></div>
+                <div class="stat"><b><span class="num-val" data-target="13">0</span>+</b><span>countries</span></div>
+                <div class="stat"><b><span class="num-val" data-target="3">0</span></b><span>media types</span></div>
                 <div class="stat"><b>0</b><span>dependencies</span></div>
             </div>
         </div>
         <div class="term">
             <div class="term-bar"><i></i><i></i><i></i></div>
-            <div class="term-body">--------------------------------------------------
-                ----- <b>Welcome to Movies Recorder</b> -----
-                --------------------------------------------------
-                01. Enter a movie to the database
-                02. Print all the movies in the database
-                03. Search for a movie
-                04. Sort the movies alphabetically
-                05. Exit
-                --------------------------------------------------
-                &gt; <span class="cursor"></span></div>
+            <div class="term-body"><span class="tline" style="transition-delay:.45s">--------------------------------------------------</span><span
+                    class="tline"
+                    style="transition-delay:.50s">----- <b>Welcome to Movies Recorder</b> -----</span><span
+                    class="tline"
+                    style="transition-delay:.55s">--------------------------------------------------</span><span
+                    class="tline" style="transition-delay:.60s">01. Enter a movie to the database</span><span
+                    class="tline" style="transition-delay:.65s">02. Print all the movies in the database</span><span
+                    class="tline" style="transition-delay:.70s">03. Search for a movie</span><span class="tline"
+                                                                                                   style="transition-delay:.75s">04. Sort the movies alphabetically</span><span
+                    class="tline" style="transition-delay:.80s">05. Exit</span><span class="tline"
+                                                                                     style="transition-delay:.85s">--------------------------------------------------</span><span
+                    class="tline" style="transition-delay:.90s">&gt; <span class="cursor"></span></span></div>
         </div>
+    </section>
+
+    <section id="demo">
+        <p class="eyebrow reveal">Try it live</p>
+        <h2 class="reveal">Run the recorder right here</h2>
+        <p class="lede reveal" style="margin:0 0 24px">Type a number and hit enter, just like the real CLI. A few
+            sample movies, shows and anime are preloaded so search and sort have something to work with.</p>
+        <div class="term reveal" style="max-width:640px">
+            <div class="term-bar"><i></i><i></i><i></i></div>
+            <div class="term-body demo-body" id="demoOutput"></div>
+            <div class="demo-input-row">
+                <span class="chevron">&gt;</span>
+                <input aria-label="Terminal input" autocomplete="off" class="demo-input" id="demoInput"
+                       placeholder="type a number, press enter" spellcheck="false" type="text">
+            </div>
+        </div>
+        <button class="demo-restart" id="demoRestart" type="button">↺ Restart demo</button>
     </section>
 
     <section id="catalog">
@@ -620,38 +752,43 @@
 
         <div class="row reveal">
             <span class="num">01</span>
-            <span class="title">The Matrix<div class="genres">Action, Science Fiction</div></span>
+            <span class="title">The Matrix</span>
             <span class="year">1999</span>
             <span class="country">America</span>
             <span class="stars">★★★★★</span>
+            <div class="genres">Action, Science Fiction</div>
         </div>
         <div class="row reveal">
             <span class="num">02</span>
-            <span class="title">Spirited Away<div class="genres">Animated, Fantasy</div></span>
+            <span class="title">Spirited Away</span>
             <span class="year">2001</span>
             <span class="country">Japan</span>
             <span class="stars">★★★★★</span>
+            <div class="genres">Animated, Fantasy</div>
         </div>
         <div class="row reveal">
             <span class="num">03</span>
-            <span class="title">Inception<div class="genres">Action, Sci-Fi, Thriller</div></span>
+            <span class="title">Inception</span>
             <span class="year">2010</span>
             <span class="country">America</span>
             <span class="stars">★★★★</span>
+            <div class="genres">Action, Sci-Fi, Thriller</div>
         </div>
         <div class="row reveal">
             <span class="num">04</span>
-            <span class="title">Before We Go<div class="genres">Romantic</div></span>
+            <span class="title">Before We Go</span>
             <span class="year">2019</span>
             <span class="country">America</span>
             <span class="stars">★★★★</span>
+            <div class="genres">Romantic</div>
         </div>
         <div class="row reveal">
             <span class="num">05</span>
-            <span class="title">Finding You<div class="genres">Romantic</div></span>
+            <span class="title">Finding You</span>
             <span class="year">2021</span>
             <span class="country">America</span>
             <span class="stars">★★★★</span>
+            <div class="genres">Romantic</div>
         </div>
     </section>
 
@@ -741,8 +878,28 @@ python Movie_record.py</pre>
             'Mapping 13 countries…',
             'Ready.'
         ];
+
+        function runCounters(animate) {
+            document.querySelectorAll('.num-val').forEach(function (el) {
+                var target = parseInt(el.dataset.target, 10) || 0;
+                if (!animate) {
+                    el.textContent = target;
+                    return;
+                }
+                var start = performance.now();
+                var dur = 900;
+                (function tick(now) {
+                    var p = Math.min((now - start) / dur, 1);
+                    el.textContent = Math.round(p * target);
+                    if (p < 1) requestAnimationFrame(tick);
+                })(start);
+            });
+        }
+
         if (reduce) {
             pre.classList.add('done');
+            document.body.classList.add('loaded');
+            runCounters(false);
             return;
         }
         var i = 0;
@@ -756,6 +913,10 @@ python Movie_record.py</pre>
             } else {
                 setTimeout(function () {
                     pre.classList.add('done');
+                    document.body.classList.add('loaded');
+                    setTimeout(function () {
+                        runCounters(true);
+                    }, 500);
                 }, 350);
             }
         }
@@ -799,6 +960,205 @@ python Movie_record.py</pre>
         items.forEach(function (el) {
             observer.observe(el);
         });
+    })();
+
+    (function () {
+        var out = document.getElementById('demoOutput');
+        var input = document.getElementById('demoInput');
+        var restart = document.getElementById('demoRestart');
+        if (!out || !input) return;
+
+        var db = {
+            movies: [
+                {t: 'The Matrix', g: 'Action, Science Fiction', c: 'America', y: 1999, r: 5},
+                {t: 'Inception', g: 'Action, Sci-Fi, Thriller', c: 'America', y: 2010, r: 4},
+                {t: 'Before We Go', g: 'Romantic', c: 'America', y: 2019, r: 4}
+            ],
+            tv: [
+                {t: 'Breaking Bad', g: 'Crime, Drama', c: 'America', y: 2008, r: 5},
+                {t: 'Stranger Things', g: 'Sci-Fi, Horror', c: 'America', y: 2016, r: 4}
+            ],
+            anime: [
+                {t: 'Spirited Away', g: 'Fantasy', c: 'Japan', y: 2001, r: 5},
+                {t: 'Death Note', g: 'Thriller, Mystery', c: 'Japan', y: 2006, r: 5},
+                {t: 'Attack on Titan', g: 'Action, Fantasy', c: 'Japan', y: 2013, r: 5}
+            ]
+        };
+        var labels = {movies: 'Movies', tv: 'Tv-Series', anime: 'Anime'};
+        var state, type, addStep, draft;
+
+        function line(text, cls) {
+            var d = document.createElement('div');
+            if (cls) d.className = 'out-' + cls;
+            d.textContent = text;
+            out.appendChild(d);
+            out.scrollTop = out.scrollHeight;
+        }
+
+        function rule() {
+            line('-'.repeat(48), 'dim');
+        }
+
+        function singular(ty) {
+            return ty === 'movies' ? 'movie' : ty === 'tv' ? 'tv-series' : 'anime';
+        }
+
+        function article(ty) {
+            return ty === 'anime' ? 'an' : 'a';
+        }
+
+        function mainMenu() {
+            line('What do you want to add (movies/tv-series/anime)..?', 'heading');
+            ['Movies', 'Tv-Series', 'Anime', 'Exit main menu'].forEach(function (l, i) {
+                line(String(i + 1).padStart(2, '0') + '. ' + l);
+            });
+            rule();
+        }
+
+        function typeMenu() {
+            rule();
+            line('----- Welcome to ' + labels[type] + ' Recorder -----', 'heading');
+            rule();
+            line('01. Enter ' + article(type) + ' ' + singular(type) + ' to the database');
+            line('02. Print all the ' + labels[type].toLowerCase() + ' in the database');
+            line('03. Search for ' + article(type) + ' ' + singular(type));
+            line('04. Sort the ' + labels[type].toLowerCase() + ' alphabetically');
+            line('05. Exit');
+            rule();
+        }
+
+        function fmt(m) {
+            return m.t + ' (' + m.y + ') \u2014 ' + m.g + ' \u2014 ' + m.c + ' \u2014 ' + '\u2605'.repeat(m.r);
+        }
+
+        function listAll() {
+            if (!db[type].length) {
+                line('(empty \u2014 nothing added yet)', 'dim');
+                return;
+            }
+            db[type].forEach(function (m, i) {
+                line((i + 1) + '. ' + fmt(m));
+            });
+        }
+
+        function sortAll() {
+            db[type].slice().sort(function (a, b) {
+                return a.t.localeCompare(b.t);
+            }).forEach(function (m, i) {
+                line((i + 1) + '. ' + m.t);
+            });
+        }
+
+        function search(q) {
+            var hits = db[type].filter(function (m) {
+                return m.t.toLowerCase().indexOf(q.toLowerCase()) !== -1;
+            });
+            if (!hits.length) {
+                line('No matches found.', 'dim');
+                return;
+            }
+            hits.forEach(function (m) {
+                line(fmt(m));
+            });
+        }
+
+        function reset() {
+            out.innerHTML = '';
+            state = 'main';
+            type = null;
+            mainMenu();
+            input.value = '';
+        }
+
+        function handle(raw) {
+            var val = raw.trim();
+            if (!val) return;
+            line('> ' + val, 'gold');
+
+            if (state === 'main') {
+                if (val === '1') {
+                    type = 'movies';
+                    state = 'type';
+                    typeMenu();
+                } else if (val === '2') {
+                    type = 'tv';
+                    state = 'type';
+                    typeMenu();
+                } else if (val === '3') {
+                    type = 'anime';
+                    state = 'type';
+                    typeMenu();
+                } else if (val === '4') {
+                    line('Goodbye!', 'heading');
+                    state = 'done';
+                } else {
+                    line('Not a valid option \u2014 try 1, 2, 3 or 4.', 'dim');
+                }
+            } else if (state === 'done') {
+                line('Session ended \u2014 use \u21BA Restart demo below to run it again.', 'dim');
+            } else if (state === 'type') {
+                if (val === '1') {
+                    state = 'add';
+                    addStep = 0;
+                    draft = {};
+                    line('Title:');
+                } else if (val === '2') {
+                    listAll();
+                    typeMenu();
+                } else if (val === '3') {
+                    state = 'search';
+                    line('Search by title:');
+                } else if (val === '4') {
+                    sortAll();
+                    typeMenu();
+                } else if (val === '5') {
+                    state = 'main';
+                    type = null;
+                    mainMenu();
+                } else {
+                    line('Not a valid option \u2014 try 1 to 5.', 'dim');
+                }
+            } else if (state === 'search') {
+                search(val);
+                state = 'type';
+                typeMenu();
+            } else if (state === 'add') {
+                if (addStep === 0) {
+                    draft.t = val;
+                    addStep = 1;
+                    line('Genre(s), comma separated:');
+                } else if (addStep === 1) {
+                    draft.g = val;
+                    addStep = 2;
+                    line('Country:');
+                } else if (addStep === 2) {
+                    draft.c = val;
+                    addStep = 3;
+                    line('Year:');
+                } else if (addStep === 3) {
+                    draft.y = parseInt(val, 10) || new Date().getFullYear();
+                    addStep = 4;
+                    line('Rating (1-5):');
+                } else if (addStep === 4) {
+                    var r = parseInt(val, 10);
+                    draft.r = (r >= 1 && r <= 5) ? r : 3;
+                    db[type].push(draft);
+                    line('\u2713 Added "' + draft.t + '" to the ' + labels[type] + ' database.', 'gold');
+                    state = 'type';
+                    typeMenu();
+                }
+            }
+        }
+
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                var v = input.value;
+                input.value = '';
+                handle(v);
+            }
+        });
+        if (restart) restart.addEventListener('click', reset);
+        reset();
     })();
 </script>
 
